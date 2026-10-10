@@ -292,14 +292,30 @@ export default function EngineDigitalTwin({
           </div>
         </div>
 
-        {/* 3D Canvas Box */}
+        {/* 3D Canvas Box: Orbital Visualization Chamber */}
         <section
-          className="relative border border-[#1A426F] bg-[#071524] overflow-hidden shadow-2xl"
+          className="relative border border-[#1A426F] bg-[#010409] overflow-hidden shadow-2xl"
           style={{ height: '68vh', minHeight: '520px', maxHeight: '780px' }}
           aria-label="3D Turbofan Digital Twin Visualization"
         >
           {/* Three.js Canvas Container */}
           <div ref={containerRef} className="w-full h-full relative" />
+
+          {/* Deep-Space Orbital Vignette Overlay (focuses attention on turbine, pointer-events pass through) */}
+          <div
+            className="absolute inset-0 pointer-events-none z-[5]"
+            style={{
+              background:
+                'radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(1, 4, 10, 0.35) 75%, rgba(1, 4, 10, 0.85) 100%)',
+              boxShadow: 'inset 0 0 54px rgba(1, 4, 10, 0.75)',
+            }}
+          />
+
+          {/* Technical Corner Framing Reticles */}
+          <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-[#38BDF8]/40 pointer-events-none z-10" />
+          <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-[#38BDF8]/40 pointer-events-none z-10" />
+          <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-[#38BDF8]/40 pointer-events-none z-10" />
+          <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-[#38BDF8]/40 pointer-events-none z-10" />
 
           {/* Aerospace Loading Screen */}
           {isLoading && (

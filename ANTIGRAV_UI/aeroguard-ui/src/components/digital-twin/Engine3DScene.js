@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EngineGeometryBuilder } from './EngineGeometryBuilder';
+import { SpaceBackground } from './SpaceBackground';
 
 /**
  * Engine3DScene
@@ -66,8 +67,10 @@ export class Engine3DScene {
 
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x071524); // Deep aerospace navy
-    this.scene.fog = new THREE.FogExp2(0x071524, 0.015);
+    this.scene.background = new THREE.Color(0x010409); // Deep space cosmic black
+    // Linear fog: starts at 36 units so engine and central drafting grid remain 100% crisp,
+    // while distant boundaries gently dissolve into cosmic blackness
+    this.scene.fog = new THREE.Fog(0x010409, 36, 120);
   }
 
   initCamera() {
@@ -75,7 +78,7 @@ export class Engine3DScene {
       42,
       this.width / this.height,
       0.1,
-      150
+      260 // Extended far plane to accommodate deep-field stars & celestial dome
     );
     // Engineering 3/4 isometric perspective looking at intake and side profile
     this.defaultCamPos = new THREE.Vector3(-12, 6.5, 17);
@@ -108,26 +111,31 @@ export class Engine3DScene {
   }
 
   initLighting() {
-    // 1. Soft aerospace ambient light
-    const ambientLight = new THREE.AmbientLight(0x13365c, 1.2);
+    // 1. Soft aerospace ambient light (calibrated so dark titanium facets remain legible)
+    const ambientLight = new THREE.AmbientLight(0x102946, 1.25);
     this.scene.add(ambientLight);
 
     // 2. Primary key directional light (top-front-left)
-    const keyLight = new THREE.DirectionalLight(0xe2f1ff, 2.2);
+    const keyLight = new THREE.DirectionalLight(0xe8f4ff, 2.3);
     keyLight.position.set(-15, 20, 15);
     this.scene.add(keyLight);
 
     // 3. Technical rim light (cyan backlight outlining titanium blade edges)
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.8);
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.9);
     rimLight.position.set(15, -10, -15);
     this.scene.add(rimLight);
 
-    // 4. Secondary soft fill light (front-right)
-    const fillLight = new THREE.DirectionalLight(0x7c94aa, 0.9);
+    // 4. Cool-blue celestial rim light (top-rear outline silhouetting nacelle against space)
+    const celestialRimLight = new THREE.DirectionalLight(0x38bdf8, 1.35);
+    celestialRimLight.position.set(-10, 16, -16);
+    this.scene.add(celestialRimLight);
+
+    // 5. Secondary soft fill light (front-right)
+    const fillLight = new THREE.DirectionalLight(0x7c94aa, 0.95);
     fillLight.position.set(10, 8, 12);
     this.scene.add(fillLight);
 
-    // 5. Internal combustor heat point light
+    // 6. Internal combustor heat point light
     this.burnerPointLight = new THREE.PointLight(0xff7700, 1.5, 12, 1.5);
     this.burnerPointLight.position.set(1.0, 0, 0);
     this.scene.add(this.burnerPointLight);
@@ -148,12 +156,19 @@ export class Engine3DScene {
   }
 
   initGridAndEnvironment() {
-    // Engineering drafting coordinate floor grid
-    const gridHelper = new THREE.GridHelper(36, 36, 0x1a426f, 0x0e2947);
+    // 1. Procedural deep-space celestial dome & multi-layer starfield
+    this.spaceBackground = new SpaceBackground(this.scene, this.camera);
+
+    // 2. Engineering drafting coordinate floor grid (orbital datum platform)
+    const gridHelper = new THREE.GridHelper(38, 38, 0x1b4470, 0x0c2542);
     gridHelper.position.y = -4.5;
+    if (gridHelper.material) {
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.55;
+    }
     this.scene.add(gridHelper);
 
-    // Centerline datum datum plane
+    // 3. Centerline datum plane
     const datumGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-14, 0, 0),
       new THREE.Vector3(16, 0, 0),
@@ -412,6 +427,11 @@ export class Engine3DScene {
     const delta = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
+    // 0. Update space background (celestial dome centering, starfield drift, camera parallax)
+    if (this.spaceBackground) {
+      this.spaceBackground.update(delta, elapsedTime);
+    }
+
     // 1. Smooth interpolation of exploded view
     this.explodedProgress += (this.targetExplodedProgress - this.explodedProgress) * 0.08;
     this.builder.updateExplosion(this.explodedProgress);
@@ -472,5 +492,9 @@ export class Engine3DScene {
 
     if (this.controls) this.controls.dispose();
     if (this.builder) this.builder.dispose();
+    if (this.spaceBackground) {
+      this.spaceBackground.dispose();
+      this.spaceBackground = null;
+    }
   }
 }
