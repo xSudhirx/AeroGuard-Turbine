@@ -3,6 +3,7 @@ import { Engine3DScene } from './Engine3DScene';
 import EngineLoadingScreen from './EngineLoadingScreen';
 import EngineTooltip from './EngineTooltip';
 import EngineHUDOverlay from './EngineHUDOverlay';
+import AnomalyStatusPanel from './AnomalyStatusPanel';
 import RiskIndicator from '../RiskIndicator';
 
 /**
@@ -291,6 +292,8 @@ export default function EngineDigitalTwin({
             )}
           </div>
         </div>
+
+        <AnomalyStatusPanel />
 
         {/* 3D Canvas Box: Orbital Visualization Chamber */}
         <section
