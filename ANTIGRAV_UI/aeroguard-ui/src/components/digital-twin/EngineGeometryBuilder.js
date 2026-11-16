@@ -270,7 +270,7 @@ export class EngineGeometryBuilder {
 
     // Spinner Nose Cone
     const spinnerGeom = new THREE.ConeGeometry(0.85, 2.2, 32);
-    spinnerGeom.rotateZ(-Math.PI / 2);
+    spinnerGeom.rotateZ(Math.PI / 2);
     const spinner = new THREE.Mesh(spinnerGeom, this.materials.titanium);
     spinner.position.x = -1.1;
     rotor.add(spinner);
@@ -280,7 +280,7 @@ export class EngineGeometryBuilder {
     for (let i = 0; i < 40; i++) {
       const t = i / 40;
       const angle = t * Math.PI * 4;
-      const r = (1 - t) * 0.75 + 0.05;
+      const r = t * 0.75 + 0.05;
       const x = -1.1 + (t - 0.5) * 1.8;
       spiralPts.push(new THREE.Vector3(x, Math.sin(angle) * r, Math.cos(angle) * r));
     }
